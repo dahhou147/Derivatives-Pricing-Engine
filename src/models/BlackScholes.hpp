@@ -1,6 +1,6 @@
-#ifndef BS_HPP
-#define BS_HPP
-#include <IPricer.hpp>
+#ifndef BLACKSCHOLES_HPP
+#define BLACKSCHOLES_HPP
+#include <IOptionPricer.hpp>
 #include <cmath>
 
 // la vol est une carateristique de l'option pas de pricer

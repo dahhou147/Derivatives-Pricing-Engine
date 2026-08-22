@@ -44,7 +44,7 @@ In [src/models/IPricer.hpp](src/models/IPricer.hpp):
 
 ### 5. Greeks
 
-In [src/greeks/BS_greeks.hpp](src/greeks/BS_greeks.hpp), [src/greeks/BS_greeks.cpp](src/greeks/BS_greeks.cpp), [src/greeks/Heston_greeks.hpp](src/greeks/Heston_greeks.hpp), and [src/greeks/Heston_greeks.cpp](src/greeks/Heston_greeks.cpp):
+Dans [src/greeks/BlackScholesGreeks.hpp](src/greeks/BlackScholesGreeks.hpp), [src/greeks/BlackScholesGreeks.cpp](src/greeks/BlackScholesGreeks.cpp), [src/greeks/HestonGreeks.hpp](src/greeks/HestonGreeks.hpp), and [src/greeks/HestonGreeks.cpp](src/greeks/HestonGreeks.cpp) :
 
 - calculation of `delta`, `gamma`, `vega`, `theta`, and `rho`
 - implementation for both Black-Scholes and Heston models
@@ -83,19 +83,19 @@ Pricer/
 ├── src/
 │   ├── main.cpp
 │   ├── calibration/
-│   │   ├── BSCalib.cpp
-│   │   └── BSCalib.hpp
+│   │   ├── VolatilitySurfaceCalibrator.cpp
+│   │   └── VolatilitySurfaceCalibrator.hpp
 │   ├── greeks/
-│   │   ├── BS_greeks.cpp
-│   │   ├── BS_greeks.hpp
-│   │   ├── Heston_greeks.cpp
-│   │   └── Heston_greeks.hpp
+│   │   ├── BlackScholesGreeks.cpp
+│   │   ├── BlackScholesGreeks.hpp
+│   │   ├── HestonGreeks.cpp
+│   │   └── HestonGreeks.hpp
 │   ├── models/
-│   │   ├── BS.cpp
-│   │   ├── BS.hpp
-│   │   ├── Heston.cpp
-│   │   ├── Heston.hpp
-│   │   ├── IPricer.hpp
+│   │   ├── BlackScholes.cpp
+│   │   ├── BlackScholes.hpp
+│   │   ├── HestonModel.cpp
+│   │   ├── HestonModel.hpp
+│   │   ├── IOptionPricer.hpp
 │   │   └── ...
 │   ├── types/
 │   │   └── types.hpp

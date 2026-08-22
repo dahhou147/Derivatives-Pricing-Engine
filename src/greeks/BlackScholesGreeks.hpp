@@ -1,15 +1,17 @@
-#ifndef BS_greeks_HPP
-#define BS_greeks_HPP
-#include <BS.hpp>
-class greeks_bs {
+#ifndef BLACKSCHOLESGREEKS_HPP
+#define BLACKSCHOLESGREEKS_HPP
+#include <BlackScholes.hpp>
+class BSGreeks {
 private:
     BS pricer;
     Option option;
     double d1, d2;
+
 public:
-    greeks_bs(BS pricer_) : pricer(pricer_), option(pricer_.get_option()) {
+    BSGreeks(BS pricer_) : pricer(pricer_), option(pricer_.get_option()) {
         auto [_d1, _d2] = pricer_.d1_d2();
-        d1 = _d1; d2 = _d2;
+        d1 = _d1;
+        d2 = _d2;
     }
     BS get_pricer() const;
     double delta() const;

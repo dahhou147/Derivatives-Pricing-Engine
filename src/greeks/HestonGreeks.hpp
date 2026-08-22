@@ -1,16 +1,17 @@
-#ifndef Heston_greeks_HPP
-#define Heston_greeks_HPP
-#include <Heston.hpp>
+#ifndef HESTONGREEKS_HPP
+#define HESTONGREEKS_HPP
+#include <HestonModel.hpp>
 constexpr double EPSILON = 1e-5;
-class greeks_Heston {
+class HestonGreeks {
 private:
     Heston pricer;
-    Option opt;
+    Option option;
     HestonParams params;
+
 public:
-    greeks_Heston(Heston pricer_) : pricer(pricer_) {
+    HestonGreeks(Heston pricer_) : pricer(pricer_) {
         params = pricer.get_params();
-        opt = pricer.get_option();
+        option = pricer.get_option();
     }
     double delta() const;
     double gamma() const;

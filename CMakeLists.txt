@@ -27,11 +27,11 @@ find_library(NLOPT_CXX_LIBRARY NAMES nlopt_cxx)
 # Main executable
 add_executable(pricer
     src/main.cpp
-    src/models/BS.cpp
-    src/models/Heston.cpp
-    src/greeks/BS_greeks.cpp
-    src/greeks/Heston_greeks.cpp
-    src/calibration/BSCalib.cpp
+    src/models/BlackScholes.cpp
+    src/models/HestonModel.cpp
+    src/greeks/BlackScholesGreeks.cpp
+    src/greeks/HestonGreeks.cpp
+    src/calibration/VolatilitySurfaceCalibrator.cpp
 )
 
 # Include dirs for custom headers
