@@ -1,78 +1,78 @@
 # Derivatives Pricing Engine
 
-Ce dépôt est un projet C++20 pour le pricing d’options et l’analyse de sensibilités par des modèles financiers simples.
+This repository is a C++20 project for option pricing and sensitivity analysis using simple financial models.
 
-Il contient actuellement des éléments de pricing Black-Scholes et Heston, ainsi que des structures de base pour les greeks et la calibration.
+It currently includes Black-Scholes and Heston pricing components, along with basic structures for Greeks and calibration.
 
-## Ce qui est réellement implémenté
+## What is actually implemented
 
-### 1. Structures de données de marché
+### 1. Market data structures
 
-Dans [src/types/types.hpp](src/types/types.hpp) :
+In [src/types/types.hpp](src/types/types.hpp):
 
-- `Option` : spot, strike, maturity, taux sans risque, dividende, type d’option
-- `OptionType` : `Call` / `Put`
-- `HestonParams` : paramètres du modèle Heston
-- `MarketData` et `MarketQuote` : structures de données de marché
+- `Option`: spot, strike, maturity, risk-free rate, dividend, option type
+- `OptionType`: `Call` / `Put`
+- `HestonParams`: parameters of the Heston model
+- `MarketData` and `MarketQuote`: market data structures
 
-### 2. Modèle Black-Scholes
+### 2. Black-Scholes model
 
-Dans [src/models/BS.hpp](src/models/BS.hpp) et [src/models/BS.cpp](src/models/BS.cpp) :
+In [src/models/BS.hpp](src/models/BS.hpp) and [src/models/BS.cpp](src/models/BS.cpp):
 
-- classe `BS` héritant d’un template générique `IPricer`
-- calcul de `d1` et `d2`
-- pricing d’option call / put
-- accès au paramètre de volatilité implicite
+- `BS` class inheriting from the generic `IPricer` template
+- computation of `d1` and `d2`
+- pricing for call / put options
+- access to the implied-volatility parameter
 
-### 3. Modèle de Heston
+### 3. Heston model
 
-Dans [src/models/Heston.hpp](src/models/Heston.hpp) et [src/models/Heston.cpp](src/models/Heston.cpp) :
+In [src/models/Heston.hpp](src/models/Heston.hpp) and [src/models/Heston.cpp](src/models/Heston.cpp):
 
-- classe `Heston`
-- paramétrage avec `kappa`, `theta`, `vol_vol`, `rho`, `v0`
-- fonction caractéristique Heston
-- intégration numérique pour le pricing
-- pricing d’option call / put
-- accès aux paramètres via `get_params()`
+- `Heston` class
+- parameters: `kappa`, `theta`, `vol_vol`, `rho`, `v0`
+- Heston characteristic function
+- numerical integration for pricing
+- call / put option pricing
+- access to model parameters through `get_params()`
 
-### 4. Template générique de pricing
+### 4. Generic pricing template
 
-Dans [src/models/IPricer.hpp](src/models/IPricer.hpp) :
+In [src/models/IPricer.hpp](src/models/IPricer.hpp):
 
-- `IPricer<Derived>` fournit une interface commune
-- méthode `price()` selon le type d’option (`Call` / `Put`)
+- `IPricer<Derived>` provides a common interface
+- `price()` method dispatches based on option type (`Call` / `Put`)
 
 ### 5. Greeks
 
-Dans [src/greeks/BS_greeks.hpp](src/greeks/BS_greeks.hpp), [src/greeks/BS_greeks.cpp](src/greeks/BS_greeks.cpp), [src/greeks/Heston_greeks.hpp](src/greeks/Heston_greeks.hpp), [src/greeks/Heston_greeks.cpp](src/greeks/Heston_greeks.cpp) :
+In [src/greeks/BS_greeks.hpp](src/greeks/BS_greeks.hpp), [src/greeks/BS_greeks.cpp](src/greeks/BS_greeks.cpp), [src/greeks/Heston_greeks.hpp](src/greeks/Heston_greeks.hpp), and [src/greeks/Heston_greeks.cpp](src/greeks/Heston_greeks.cpp):
 
-- calcul de `delta`, `gamma`, `vega`, `theta`, `rho`
-- implémentation pour le modèle Black-Scholes et Heston
+- calculation of `delta`, `gamma`, `vega`, `theta`, and `rho`
+- implementation for both Black-Scholes and Heston models
 
 ### 6. Calibration
 
-Dans [src/calibration/BSCalib.hpp](src/calibration/BSCalib.hpp) :
+In [src/calibration/BSCalib.hpp](src/calibration/BSCalib.hpp):
 
-- structures `ImpliedVol` et `MarketData`
-- classe `BSCalibrator` en préparation
-- idée de calibration de la surface de vol sur les prix de marché
+- `ImpliedVol` and `MarketData` structures
+- `BSCalibrator` class in progress
+- concept for calibrating the volatility surface from market prices
 
-La calibration n’est pas complétement finale dans le code actuel ; c’est plutôt une base de travail / prototype.
+Calibration is not fully finalized in the current code; it is more of a working prototype/base implementation.
 
-## Point d’entrée actuel
+## Current entry point
 
-Le programme principal dans [src/main.cpp](src/main.cpp) construit un exemple simple avec :
+The main program in [src/main.cpp](src/main.cpp) builds a simple example with:
 
 - spot = 100
 - strike = 100
 - maturity = 1.0
-- taux sans risque = 3%
-- dividende = 0
-- modèle Heston et modèle Black-Scholes
+- risk-free rate = 3%
+- dividend = 0
+- Heston and Black-Scholes models
 
-Il affiche ensuite le prix calculé par chacun des deux modèles.
+It then prints the price computed by each model.
 
-## Structure du projet
+## Project structure
 
 ```text
 Pricer/
@@ -104,21 +104,21 @@ Pricer/
 └── tests/
 ```
 
-## Prérequis
+## Requirements
 
 - CMake 3.20+
-- compilateur C++20 (g++, clang, MSVC)
-- éventuellement dépendances système utiles au projet selon l’environnement
+- C++20 compiler (g++, clang, MSVC)
+- optionally, system dependencies required by the project environment
 
 ## Build
 
-### Option 1 : utiliser le script
+### Option 1: use the script
 
 ```bash
 ./run.sh
 ```
 
-### Option 2 : build manuel
+### Option 2: manual build
 
 ```bash
 mkdir -p build
@@ -127,40 +127,40 @@ cmake ..
 cmake --build .
 ```
 
-## Exécution
+## Execution
 
 ```bash
 ./build/bin/pricer
 ```
 
-ou, si le script a été utilisé :
+or, if the script was used:
 
 ```bash
 ./run.sh
 ```
 
-## Remarques importantes
+## Important notes
 
-- Le projet est encore un moteur de pricing en développement, pas un produit fini.
-- Certaines parties sont des prototypes de calibration / greeks.
-- Les conventions de nommage de certains champs d’option peuvent encore être inégales dans le code.
-- Le cœur de la logique de pricing est présent, mais il faut encore nettoyer et unifier certaines parties avant un usage industriel.
+- The project is still a pricing engine in development, not a finished product.
+- Some parts are calibration / Greeks prototypes.
+- Naming conventions for some option fields are still uneven across the codebase.
+- The core pricing logic is present, but some parts still need cleanup and unification before industrial use.
 
-## Objectif du projet
+## Project goal
 
-Le but est de fournir un moteur de pricing de dérivés avec :
+The goal is to provide a derivatives pricing engine with:
 
-- prix de marché d’options via modèles de référence,
-- calcul de sensibilités (greeks),
-- préparation de calibrations de volatilités implicites,
-- structure extensible pour ajouter des modèles de pricing supplémentaires.
+- market option pricing via reference models,
+- Greeks calculation,
+- preparation for implied-volatility calibration,
+- extensible structure for adding more pricing models.
 
-## État actuel
+## Current status
 
-Le projet est fonctionnel comme prototype de pricing et d’exploration de modèles financiers en C++20, avec une implémentation concrète de :
+The project is functional as a C++20 prototype for pricing and exploring financial models, with concrete implementations of:
 
 - Black-Scholes
 - Heston
-- interface générique de pricing
-- greeks de base
-- base de calibration de surface de vol
+- generic pricing interface
+- basic Greeks
+- basic volatility-surface calibration foundation
