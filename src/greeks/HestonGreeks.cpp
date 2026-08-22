@@ -42,8 +42,8 @@ double HestonGreeks::theta() const {
 }
 double HestonGreeks::rho() const {
     Option up = option, down = option;
-    up.risk_free_rate += EPSILON;
-    down.risk_free_rate -= EPSILON;
+    up.free_risk_rate += EPSILON;
+    down.free_risk_rate -= EPSILON;
     double p_up =
         Heston(up, params.kappa, params.theta, params.vol_vol, params.rho, params.v0).price();
     double p_down =

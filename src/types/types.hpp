@@ -6,11 +6,29 @@
 
 enum class OptionType { Call, Put };
 
+struct ImpliedVol {
+    double spot;
+    double strike;
+    double market_price;
+    double maturity;
+    double implied_vol;
+};
+
+struct MarketOptionData {
+    double spot;
+    double strike;
+    double maturity;
+    double price;
+    double free_risk_rate;
+    double dividend;
+    OptionType type ; 
+};
+
 struct Option {
     double spot;
     double strike;
     double maturity;
-    double risk_free_rate;
+    double free_risk_rate;
     double dividend;
     OptionType type;
 };
@@ -29,16 +47,6 @@ struct HestonParams {
     bool is_valid() const {
         return kappa > 0.0 && theta > 0.0 && vol_vol > 0.0 && rho >= -1.0 && rho <= 1.0 && v0 > 0.0;
     }
-};
-
-struct MarketData {
-    double spot;
-    // this depends on the maturity ESTER as free risk interest rate
-    //
-    double dividend;
-    std::vector<double> maturities;
-    std::vector<double> strikes;
-    std::vector<double> market_prices;
 };
 
 struct MarketQuote {

@@ -1,12 +1,13 @@
 #include <BlackScholes.hpp>
 #include <HestonModel.hpp>
+#include <VolatilitySurfaceCalibrator.hpp>
 #include <iostream>
 #include <types.hpp>
 
 int main() {
 
-    double spot = 100;
-    double strike = 100;
+    double spot = 100.0;
+    double strike = 100.0;
     double maturity = 1.0;
     double free_risk_interest_rate = 0.03;
     double dividend = 0.0;
@@ -23,9 +24,25 @@ int main() {
     BS black(opt, implied_vol);
 
     auto price_BS = black.price();
-
     auto price_heston = heston.price();
+
     std::cout << "le prix de l'option selon Heston est : " << price_heston << std::endl;
     std::cout << "le prix de l'option selon black est : " << price_BS << std::endl;
+
+    MarketOptionData market_quote = {spot, strike, maturity, 9.0, free_risk_interest_rate, 0.0, OptionType::Call};
+
+    BSCalibrator calibrator({market_quote});
+    calibrator.fit();
+
+    auto ivs= calibrator.get_ivs();
+    for(auto & iv:ivs){
+        std::cout<< "la iv est  : "<<iv.implied_vol<<std::endl;
+    }
+    double iv  = 0.189305;
+    BS black_test(opt, iv);
+    double price_test = black_test.price();
+
+    std::cout << "this norly should be :"<< price_test << std:: endl;
+
     return 0;
 }

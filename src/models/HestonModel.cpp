@@ -15,7 +15,7 @@ std::complex<double> Heston::characteristic_function(std::complex<double> u) con
     std::complex<double> g = A_minus / A_plus;
     std::complex<double> exp_dt = exp(-d * option.maturity);
     std::complex<double> C =
-        option.risk_free_rate * i * u * option.maturity +
+        option.free_risk_rate * i * u * option.maturity +
         (kappa * theta) / (vol_vol * vol_vol) *
             (A_minus * option.maturity - 2.0 * log((1.0 - g * exp_dt) / (1.0 - g)));
     std::complex<double> D =
@@ -53,6 +53,9 @@ std::complex<double> Heston::characteristic_function(std::complex<double> u) con
  * Numerical integration is performed via Gauss-Legendre quadrature
  * on adaptive subintervals to handle the oscillatory integrand.
  *
+ * for the first iteration the length of the inverval is 0.1 Why ? because we ingrating by 1 \phi
+ * near zero this terme explose
+ *
  */
 
 double Heston::integrate(int j) const {
@@ -85,13 +88,13 @@ double Heston::price_call_impl() const {
     const double P1 = 0.5 + (1.0 / M_PI) * integrate(1);
     const double P2 = 0.5 + (1.0 / M_PI) * integrate(2);
     return option.spot * exp(-option.dividend * option.maturity) * P1 -
-           option.strike * exp(-option.risk_free_rate * option.maturity) * P2;
+           option.strike * exp(-option.free_risk_rate * option.maturity) * P2;
 }
 
 double Heston::price_put_impl() const {
     const double P1 = 0.5 + (1.0 / M_PI) * integrate(1);
     const double P2 = 0.5 + (1.0 / M_PI) * integrate(2);
-    return option.strike * exp(-option.risk_free_rate * option.maturity) * (1.0 - P2) -
+    return option.strike * exp(-option.free_risk_rate * option.maturity) * (1.0 - P2) -
            option.spot * exp(-option.dividend * option.maturity) * (1.0 - P1);
 }
 

@@ -31,14 +31,14 @@ double BSGreeks::theta() const {
         return common +
                option.dividend * option.spot * exp(-option.dividend * option.maturity) *
                    norm_cdf(d1) -
-               option.risk_free_rate * option.strike *
-                   exp(-option.risk_free_rate * option.maturity) * norm_cdf(d2);
+               option.free_risk_rate * option.strike *
+                   exp(-option.free_risk_rate * option.maturity) * norm_cdf(d2);
     case OptionType::Put:
         return common -
                option.dividend * option.spot * exp(-option.dividend * option.maturity) *
                    norm_cdf(-d1) +
-               option.risk_free_rate * option.strike *
-                   exp(-option.risk_free_rate * option.maturity) * norm_cdf(-d2);
+               option.free_risk_rate * option.strike *
+                   exp(-option.free_risk_rate * option.maturity) * norm_cdf(-d2);
     default:
         throw std::invalid_argument("Unknown option type");
     }
@@ -46,10 +46,10 @@ double BSGreeks::theta() const {
 double BSGreeks::rho() const {
     switch (option.type) {
     case OptionType::Call:
-        return option.strike * option.maturity * exp(-option.risk_free_rate * option.maturity) *
+        return option.strike * option.maturity * exp(-option.free_risk_rate * option.maturity) *
                norm_cdf(d2);
     case OptionType::Put:
-        return -option.strike * option.maturity * exp(-option.risk_free_rate * option.maturity) *
+        return -option.strike * option.maturity * exp(-option.free_risk_rate * option.maturity) *
                norm_cdf(-d2);
     default:
         throw std::invalid_argument("Unknown option type");

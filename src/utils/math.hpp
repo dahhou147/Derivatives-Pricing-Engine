@@ -1,7 +1,9 @@
 #pragma once
 #include <array>
-#include <cmath>
 #include <complex>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 inline double norm_cdf(double x) {
     return 0.5 * (1.0 - std::erf(-x / std::sqrt(2.0)));
@@ -68,4 +70,95 @@ inline double gauss_legendre(F&& f, double a, double b) {
     for (int i = 0; i < GL_N / 2; ++i)
         sum += GL_W[i] * (f(mid + half * GL_X[i]) + f(mid - half * GL_X[i]));
     return half * sum;
+}
+
+
+
+/*
+c'est l'algo de brent qui combine besect et
+
+
+*/
+
+
+struct BrentResult {
+    bool converged;
+    double root;
+};
+
+template <typename F>
+BrentResult brent_solve(F&& func, double a, double b,
+                         double tol = 1e-8, int max_iter = 100) {
+    double fa = func(a);
+    double fb = func(b);
+
+    if (fa * fb > 0.0) {
+        // pas de bracket valide : le prix marche est hors du domaine
+        // atteignable sur [a,b] -> on ne fait PAS semblant d'avoir converge
+        return {false, std::numeric_limits<double>::quiet_NaN()};
+    }
+
+    if (std::abs(fa) < std::abs(fb)) {
+        std::swap(a, b);
+        std::swap(fa, fb);
+    }
+
+    double c = a, fc = fa;
+    bool mflag = true;
+    double d = 0.0;
+
+    for (int i = 0; i < max_iter; ++i) {
+        if (std::abs(fb) < tol || std::abs(b - a) < tol) {
+            return {true, b};
+        }
+
+        double s;
+        if (fa != fc && fb != fc) {
+            // interpolation quadratique inverse
+            s = a * fb * fc / ((fa - fb) * (fa - fc)) +
+                b * fa * fc / ((fb - fa) * (fb - fc)) +
+                c * fa * fb / ((fc - fa) * (fc - fb));
+        } else {
+            // secante
+            s = b - fb * (b - a) / (fb - fa);
+        }
+
+        // conditions de securite (Brent-Dekker) : si l'IQI/secante
+        // diverge, stagne, ou sort du bracket -> on retombe sur la bissection
+        double lo = std::min((3 * a + b) / 4.0, b);
+        double hi = std::max((3 * a + b) / 4.0, b);
+        bool condition1 = (s < lo || s > hi);
+        bool condition2 = mflag && std::abs(s - b) >= std::abs(b - c) / 2.0;
+        bool condition3 = !mflag && std::abs(s - b) >= std::abs(c - d) / 2.0;
+        bool condition4 = mflag && std::abs(b - c) < tol;
+        bool condition5 = !mflag && std::abs(c - d) < tol;
+
+        if (condition1 || condition2 || condition3 || condition4 || condition5) {
+            s = (a + b) / 2.0;  // bissection
+            mflag = true;
+        } else {
+            mflag = false;
+        }
+
+        double fs = func(s);
+        d = c;   // d = avant-avant point
+        c = b;   // c = ancien b
+        fc = fb;
+
+        if (fa * fs < 0.0) {
+            b = s;
+            fb = fs;
+        } else {
+            a = s;
+            fa = fs;
+        }
+
+        if (std::abs(fa) < std::abs(fb)) {
+            std::swap(a, b);
+            std::swap(fa, fb);
+        }
+    }
+
+    // pas converge dans max_iter -> on le signale
+    return {std::abs(fb) < tol, b};
 }
