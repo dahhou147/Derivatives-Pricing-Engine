@@ -18,11 +18,28 @@ private:
     std::vector<ImpliedVol> results;
 
 public:
-    BSCalibrator(std::vector<MarketOptionData> market_data_) : market_data(market_data_) {};
+    BSCalibrator(std::vector<MarketOptionData> & market_data_) : market_data(market_data_) {};
 
     void fit();
 
     std::vector<ImpliedVol> get_ivs() const;
+};
+
+
+class HestonCalibrator{
+    private: 
+    std::vector<MarketOptionData> market_data;
+    HestonParams params;
+
+    public : 
+
+    HestonCalibrator(std::vector<MarketOptionData> & market_data_): market_data(market_data_){}
+
+
+    void fit();
+
+    HestonParams GetParams() const; 
+    void SetParams(const HestonParams & calibrated_params); 
 };
 
 #endif

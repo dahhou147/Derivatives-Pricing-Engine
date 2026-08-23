@@ -48,12 +48,4 @@ struct HestonParams {
         return kappa > 0.0 && theta > 0.0 && vol_vol > 0.0 && rho >= -1.0 && rho <= 1.0 && v0 > 0.0;
     }
 };
-
-struct MarketQuote {
-    double strike;
-    double maturity;
-    double price;
-    bool isCall;
-};
-
 #endif

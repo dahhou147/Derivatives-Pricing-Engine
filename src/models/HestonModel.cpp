@@ -1,26 +1,25 @@
 #include <HestonModel.hpp>
 #include <math.hpp>
 
-Heston::Heston(Option options, double kappa, double theta, double vol_vol, double rho, double v0) :
-    IPricer<Heston>(options), kappa(kappa), theta(theta), vol_vol(vol_vol), rho(rho), v0(v0) {
+Heston::Heston(Option options, HestonParams params_) : IPricer<Heston>(options), params(params_) {
 }
 
 std::complex<double> Heston::characteristic_function(std::complex<double> u) const {
     const std::complex<double> i(0.0, 1.0);
     const double x = log(option.spot);
-    std::complex<double> d =
-        sqrt(pow(kappa - rho * vol_vol * i * u, 2.0) + vol_vol * vol_vol * u * (u + i));
-    std::complex<double> A_minus = kappa - rho * vol_vol * i * u - d;
-    std::complex<double> A_plus = kappa - rho * vol_vol * i * u + d;
+    std::complex<double> d = sqrt(pow(params.kappa - params.rho * params.vol_vol * i * u, 2.0) +
+                                  params.vol_vol * params.vol_vol * u * (u + i));
+    std::complex<double> A_minus = params.kappa - params.rho * params.vol_vol * i * u - d;
+    std::complex<double> A_plus = params.kappa - params.rho * params.vol_vol * i * u + d;
     std::complex<double> g = A_minus / A_plus;
     std::complex<double> exp_dt = exp(-d * option.maturity);
     std::complex<double> C =
         option.free_risk_rate * i * u * option.maturity +
-        (kappa * theta) / (vol_vol * vol_vol) *
+        (params.kappa * params.theta) / (params.vol_vol * params.vol_vol) *
             (A_minus * option.maturity - 2.0 * log((1.0 - g * exp_dt) / (1.0 - g)));
     std::complex<double> D =
-        (A_minus / (vol_vol * vol_vol)) * ((1.0 - exp_dt) / (1.0 - g * exp_dt));
-    return exp(C + D * v0 + i * u * x);
+        (A_minus / (params.vol_vol * params.vol_vol)) * ((1.0 - exp_dt) / (1.0 - g * exp_dt));
+    return exp(C + D * params.v0 + i * u * x);
 }
 
 /*
@@ -99,5 +98,5 @@ double Heston::price_put_impl() const {
 }
 
 HestonParams Heston::get_params() const {
-    return {kappa, theta, vol_vol, rho, v0};
+    return params;
 }

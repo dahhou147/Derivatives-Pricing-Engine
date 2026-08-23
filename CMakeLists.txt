@@ -65,6 +65,13 @@ endif()
 # Link Boost (always required)
 target_link_libraries(pricer PRIVATE ${Boost_LIBRARIES})
 
+# Find Eigen3 (required by Ceres and some headers)
+find_package(Eigen3 REQUIRED)
+if(Eigen3_FOUND)
+    target_link_libraries(pricer PRIVATE Eigen3::Eigen)
+    message(STATUS "Eigen3 found: ${Eigen3_VERSION}")
+endif()
+
 find_program(CLANG_FORMAT_EXE clang-format)
 if(CLANG_FORMAT_EXE)
     file(GLOB_RECURSE PRICER_FORMAT_SOURCES CONFIGURE_DEPENDS
@@ -88,6 +95,13 @@ if(CLANG_FORMAT_EXE)
     )
 else()
     message(WARNING "clang-format not found; format targets disabled")
+endif()
+
+# Find Ceres (used for calibration)
+find_package(Ceres REQUIRED)
+if(Ceres_FOUND)
+    target_link_libraries(pricer PRIVATE Ceres::ceres)
+    message(STATUS "Ceres found: ${Ceres_VERSION}")
 endif()
 
 # Optional: Add tests subdirectory if tests exist

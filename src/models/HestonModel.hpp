@@ -2,17 +2,16 @@
 #define HESTONMODEL_HPP
 #include <IOptionPricer.hpp>
 #include <complex>
+#include <types.hpp>
 
 class Heston : public IPricer<Heston> {
 private:
-    double kappa;
-    double theta;
-    double vol_vol;
-    double rho;
-    double v0;
+
+    HestonParams params;
 
 public:
-    Heston(Option options, double kappa, double theta, double vol_vol, double rho, double v0);
+    Heston(Option options, HestonParams params_);
+    // NOTE: use the constructor taking `HestonParams` to construct Heston.
     std::complex<double> characteristic_function(std::complex<double> u) const;
     double integrate(int j) const;
     double price_call_impl() const;
