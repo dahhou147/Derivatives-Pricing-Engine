@@ -10,6 +10,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+enable_testing()
+
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/heads/main.zip
+)
+FetchContent_MakeAvailable(googletest)
+
 # Find Boost (required)
 find_package(Boost REQUIRED)
 
@@ -33,6 +42,22 @@ add_executable(pricer
     src/greeks/HestonGreeks.cpp
     src/calibration/VolatilitySurfaceCalibrator.cpp
 )
+
+# GoogleTest executable
+add_executable(pricer_tests
+    src/test/test_black_scholes.cpp
+    src/models/BlackScholes.cpp
+)
+target_include_directories(pricer_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/types
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/models
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/greeks
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/calibration
+)
+target_link_libraries(pricer_tests PRIVATE gtest_main)
+include(GoogleTest)
+gtest_discover_tests(pricer_tests)
 
 # Include dirs for custom headers
 target_include_directories(pricer PRIVATE
