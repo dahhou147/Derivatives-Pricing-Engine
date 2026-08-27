@@ -45,7 +45,7 @@ add_executable(pricer
 
 # GoogleTest executable
 add_executable(pricer_tests
-    src/test/test_black_scholes.cpp
+    src/test/test_pricers_and_greeks.cpp
     src/models/BlackScholes.cpp
     src/models/HestonModel.cpp
     src/greeks/BlackScholesGreeks.cpp
