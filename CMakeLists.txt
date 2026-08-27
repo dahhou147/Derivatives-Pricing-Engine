@@ -47,6 +47,9 @@ add_executable(pricer
 add_executable(pricer_tests
     src/test/test_black_scholes.cpp
     src/models/BlackScholes.cpp
+    src/models/HestonModel.cpp
+    src/greeks/BlackScholesGreeks.cpp
+    src/greeks/HestonGreeks.cpp
 )
 target_include_directories(pricer_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/types
