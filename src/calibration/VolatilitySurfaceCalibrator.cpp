@@ -76,7 +76,7 @@ public:
             Option opt = {option.spot,           option.strike,   option.maturity,
                           option.free_risk_rate, option.dividend, option.type};
             market_ivs.push_back(readsmile(option.price, opt));
-        }
+        }   
     }
 
     bool operator()(const double* const params, double* residuals) const {
