@@ -67,9 +67,16 @@ double readsmile(double price, Option option) {
 struct HestonCostFunction {
 private:
     std::vector<MarketOptionData> data;
+    std::vector<double> market_ivs;
 
 public:
     HestonCostFunction(std::vector<MarketOptionData> & data_) : data(data_) {
+        market_ivs.reserve(data.size());
+        for (auto& option : data) {
+            Option opt = {option.spot,           option.strike,   option.maturity,
+                          option.free_risk_rate, option.dividend, option.type};
+            market_ivs.push_back(readsmile(option.price, opt));
+        }
     }
 
     bool operator()(const double* const params, double* residuals) const {
@@ -87,8 +94,7 @@ public:
             Heston heston(opt, hparams);
             double heston_price = heston.price();
             double iv_heston = readsmile(heston_price, opt);
-            double iv_market = readsmile(option.price, opt);
-            residuals[i] = iv_heston - iv_market;
+            residuals[i] = iv_heston - market_ivs[i];
             i++;
         }
         return true;
@@ -121,6 +127,15 @@ void HestonCalibrator::fit() {
             new HestonCostFunction(market_data), ceres::TAKE_OWNERSHIP,
             static_cast<int>(market_data.size()));
     problem.AddResidualBlock(cost_function, nullptr, hparams);
+
+    // Pénalité de Feller (2*kappa*theta >= vol_vol^2) : sans ce résidu, rien
+    // n'empêche le solveur de converger vers une zone où la variance peut
+    // toucher zéro (schéma non défini / volatilité mal posée). AutoDiff
+    // convient ici car FellerCondition::operator() est un template <T>.
+    ceres::CostFunction* feller_cost =
+        new ceres::AutoDiffCostFunction<FellerCondition, 1, 5>(new FellerCondition());
+    problem.AddResidualBlock(feller_cost, nullptr, hparams);
+
     problem.SetParameterLowerBound(hparams, 0, 0.01);
     problem.SetParameterUpperBound(hparams, 0, 15.0);
     problem.SetParameterLowerBound(hparams, 1, 0.0001);
