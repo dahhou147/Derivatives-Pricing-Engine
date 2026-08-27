@@ -20,6 +20,6 @@ double BS::price_put_impl() const {
     return option.strike * exp(-option.free_risk_rate * option.maturity) * norm_cdf(-d2) -
            option.spot * exp(-option.dividend * option.maturity) * norm_cdf(-d1);
 }
-double BS::get_sigma() const {
+double BS::GetSigma() const {
     return implied_vol;
 }

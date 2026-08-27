@@ -14,6 +14,6 @@ public:
     std::pair<double, double> d1_d2() const;
     double price_call_impl() const;
     double price_put_impl() const;
-    double get_sigma() const;
+    double GetSigma() const;
 };
 #endif

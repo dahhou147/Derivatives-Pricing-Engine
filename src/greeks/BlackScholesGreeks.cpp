@@ -17,7 +17,7 @@ double BSGreeks::delta() const {
 }
 double BSGreeks::gamma() const {
     return exp(-option.dividend * option.maturity) * norm_density(d1) /
-           (option.spot * pricer.get_sigma() * std::sqrt(option.maturity));
+           (option.spot * pricer.GetSigma() * std::sqrt(option.maturity));
 }
 double BSGreeks::vega() const {
     return option.spot * exp(-option.dividend * option.maturity) * norm_density(d1) *
@@ -25,7 +25,7 @@ double BSGreeks::vega() const {
 }
 double BSGreeks::theta() const {
     double common = -option.spot * exp(-option.dividend * option.maturity) * norm_density(d1) *
-                    pricer.get_sigma() / (2.0 * std::sqrt(option.maturity));
+                    pricer.GetSigma() / (2.0 * std::sqrt(option.maturity));
     switch (option.type) {
     case OptionType::Call:
         return common +

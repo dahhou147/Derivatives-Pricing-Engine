@@ -21,7 +21,7 @@ struct MarketOptionData {
     double price;
     double free_risk_rate;
     double dividend;
-    OptionType type ; 
+    OptionType type;
 };
 
 struct Option {
@@ -31,6 +31,12 @@ struct Option {
     double free_risk_rate;
     double dividend;
     OptionType type;
+
+    bool operator==(const Option& other) const {
+        return spot == other.spot && strike == other.strike && maturity == other.maturity &&
+               free_risk_rate == other.free_risk_rate && dividend == other.dividend &&
+               type == other.type;
+    }
 };
 
 struct HestonParams {
