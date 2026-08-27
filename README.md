@@ -1,76 +1,59 @@
-# Derivatives Pricing Engine
+# Pricer
 
-This repository is a C++20 project for option pricing and sensitivity analysis using simple financial models.
+A C++ quantitative finance project focused on equity derivatives pricing, Greeks, and model calibration.
 
-It currently includes Black-Scholes and Heston pricing components, along with basic structures for Greeks and calibration.
+This repository explores the core building blocks of a pricing engine: Black-Scholes valuation, Heston stochastic volatility, sensitivity analysis, and calibration workflows. The goal is to implement financial models in a clean, extensible, and testable C++ architecture while reinforcing the numerical and software engineering skills required in quantitative finance.
 
-## What is actually implemented
+## Why this project
 
-### 1. Market data structures
+Pricing is one of the foundations of modern quantitative finance. A robust pricing engine must combine:
 
-In [src/types/types.hpp](src/types/types.hpp):
+- mathematical modeling
+- numerical stability
+- performance-aware implementation
+- validation through tests
+- extensibility for additional models and risk measures
 
-- `Option`: spot, strike, maturity, risk-free rate, dividend, option type
-- `OptionType`: `Call` / `Put`
-- `HestonParams`: parameters of the Heston model
-- `MarketData` and `MarketQuote`: market data structures
+This project is built around that challenge and focuses on the mechanics behind equity derivatives valuation.
 
-### 2. Black-Scholes model
+## Core components
 
-In [src/models/BS.hpp](src/models/BS.hpp) and [src/models/BS.cpp](src/models/BS.cpp):
+### Equity option pricing
 
-- `BS` class inheriting from the generic `IPricer` template
-- computation of `d1` and `d2`
-- pricing for call / put options
-- access to the implied-volatility parameter
+- European call and put valuation
+- closed-form Black-Scholes implementation
+- d1 and d2 term computation
+- option structure modeling for pricing workflows
 
-### 3. Heston model
+### Stochastic volatility
 
-In [src/models/Heston.hpp](src/models/Heston.hpp) and [src/models/Heston.cpp](src/models/Heston.cpp):
+- Heston model implementation
+- characteristic function formulation
+- numerical integration for price evaluation
+- parameter management for model calibration
 
-- `Heston` class
-- parameters: `kappa`, `theta`, `vol_vol`, `rho`, `v0`
-- Heston characteristic function
-- numerical integration for pricing
-- call / put option pricing
-- access to model parameters through `get_params()`
+### Risk and sensitivity
 
-### 4. Generic pricing template
+- delta
+- gamma
+- vega
+- theta
+- rho
 
-In [src/models/IPricer.hpp](src/models/IPricer.hpp):
+### Calibration
 
-- `IPricer<Derived>` provides a common interface
-- `price()` method dispatches based on option type (`Call` / `Put`)
+- implied volatility extraction from synthetic market quotes
+- Heston parameter fitting experiments
+- optimization-based calibration workflows
 
-### 5. Greeks
+## Technology stack
 
-Dans [src/greeks/BlackScholesGreeks.hpp](src/greeks/BlackScholesGreeks.hpp), [src/greeks/BlackScholesGreeks.cpp](src/greeks/BlackScholesGreeks.cpp), [src/greeks/HestonGreeks.hpp](src/greeks/HestonGreeks.hpp), and [src/greeks/HestonGreeks.cpp](src/greeks/HestonGreeks.cpp) :
-
-- calculation of `delta`, `gamma`, `vega`, `theta`, and `rho`
-- implementation for both Black-Scholes and Heston models
-
-### 6. Calibration
-
-In [src/calibration/BSCalib.hpp](src/calibration/BSCalib.hpp):
-
-- `ImpliedVol` and `MarketData` structures
-- `BSCalibrator` class in progress
-- concept for calibrating the volatility surface from market prices
-
-Calibration is not fully finalized in the current code; it is more of a working prototype/base implementation.
-
-## Current entry point
-
-The main program in [src/main.cpp](src/main.cpp) builds a simple example with:
-
-- spot = 100
-- strike = 100
-- maturity = 1.0
-- risk-free rate = 3%
-- dividend = 0
-- Heston and Black-Scholes models
-
-It then prints the price computed by each model.
+- C++20
+- CMake
+- GoogleTest
+- Boost
+- Eigen3
+- Ceres
 
 ## Project structure
 
@@ -79,9 +62,7 @@ Pricer/
 ├── CMakeLists.txt
 ├── README.md
 ├── run.sh
-├── build/
 ├── src/
-│   ├── main.cpp
 │   ├── calibration/
 │   │   ├── VolatilitySurfaceCalibrator.cpp
 │   │   └── VolatilitySurfaceCalibrator.hpp
@@ -95,72 +76,55 @@ Pricer/
 │   │   ├── BlackScholes.hpp
 │   │   ├── HestonModel.cpp
 │   │   ├── HestonModel.hpp
-│   │   ├── IOptionPricer.hpp
-│   │   └── ...
+│   │   └── IOptionPricer.hpp
+│   ├── test/
+│   │   └── test_black_scholes.cpp
 │   ├── types/
 │   │   └── types.hpp
-│   └── utils/
-│       └── math.hpp
-└── tests/
+│   ├── utils/
+│   │   └── math.hpp
+│   ├── main.cpp
+│   └── ...
+└── build/
 ```
 
-## Requirements
-
-- CMake 3.20+
-- C++20 compiler (g++, clang, MSVC)
-- optionally, system dependencies required by the project environment
-
-## Build
-
-### Option 1: use the script
+## Build and run
 
 ```bash
 ./run.sh
 ```
 
-### Option 2: manual build
+or:
 
 ```bash
 mkdir -p build
 cd build
 cmake ..
 cmake --build .
+./bin/pricer
 ```
 
-## Execution
+## Tests
 
 ```bash
-./build/bin/pricer
+ctest --test-dir build --output-on-failure
 ```
 
-or, if the script was used:
+The test suite validates the core pricing logic, including:
 
-```bash
-./run.sh
-```
+- option and sigma accessors
+- d1/d2 computation
+- Black-Scholes pricing behavior
+- put-call parity
+- intrinsic value checks at zero maturity
 
-## Important notes
+## Outcome
 
-- The project is still a pricing engine in development, not a finished product.
-- Some parts are calibration / Greeks prototypes.
-- Naming conventions for some option fields are still uneven across the codebase.
-- The core pricing logic is present, but some parts still need cleanup and unification before industrial use.
+This project demonstrates a practical interest in:
 
-## Project goal
+- equity derivatives
+- quantitative finance
+- numerical pricing methods
+- C++-based financial engineering
 
-The goal is to provide a derivatives pricing engine with:
-
-- market option pricing via reference models,
-- Greeks calculation,
-- preparation for implied-volatility calibration,
-- extensible structure for adding more pricing models.
-
-## Current status
-
-The project is functional as a C++20 prototype for pricing and exploring financial models, with concrete implementations of:
-
-- Black-Scholes
-- Heston
-- generic pricing interface
-- basic Greeks
-- basic volatility-surface calibration foundation
+It is a strong example of a personal project centered on pricing models, model validation, and computational finance in C++.
