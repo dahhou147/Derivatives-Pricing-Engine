@@ -128,10 +128,10 @@ void HestonCalibrator::fit() {
             static_cast<int>(market_data.size()));
     problem.AddResidualBlock(cost_function, nullptr, hparams);
 
-    // Pénalité de Feller (2*kappa*theta >= vol_vol^2) : sans ce résidu, rien
-    // n'empêche le solveur de converger vers une zone où la variance peut
-    // toucher zéro (schéma non défini / volatilité mal posée). AutoDiff
-    // convient ici car FellerCondition::operator() est un template <T>.
+    /*
+    @fellerCondition  allow us to not have negative values of the vol
+    * add a penality of 100 if this condition is violated  
+    */
     ceres::CostFunction* feller_cost =
         new ceres::AutoDiffCostFunction<FellerCondition, 1, 5>(new FellerCondition());
     problem.AddResidualBlock(feller_cost, nullptr, hparams);
