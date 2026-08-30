@@ -161,9 +161,7 @@ Given a market option price, the engine can recover the corresponding Black-Scho
 Conceptually:
 
 $$
-C_{market}
-=
-C_{BS}(S_0,K,T,r,\sigma_{imp})
+C_{market} = C_{BS}(S_0,K,T,r,\sigma_{imp})
 $$
 
 The engine solves numerically for:
