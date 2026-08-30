@@ -53,7 +53,7 @@ std::complex<double> Heston::characteristic_function(std::complex<double> u) con
  * on adaptive subintervals to handle the oscillatory integrand.
  *
  * for the first iteration the length of the inverval is 0.1 Why ? because we ingrating by 1 \phi
- * near zero this terme explose
+ * near zero this terme explode
  *
  */
 
