@@ -442,24 +442,6 @@ The implementation is inspired by standard quantitative-finance literature, incl
 
 ---
 
-## ⚠️ Disclaimer
-
-This project is intended for **educational, research, and quantitative-finance software development purposes**.
-
-It is not intended to provide financial advice or serve as a production trading/risk-management system without appropriate independent validation.
-
----
-
-## ⭐ Support the Project
-
-If you find this project useful, consider giving it a ⭐ on GitHub.
-
-It helps the project gain visibility and motivates further development.
-
-Contributions, issues, feedback, and discussions are also welcome.
-
----
-
 ## 👤 Author
 
 **dahhou147**
