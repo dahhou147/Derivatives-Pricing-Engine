@@ -1,59 +1,64 @@
-#include <BlackScholes.hpp>
-#include <HestonModel.hpp>
-#include <VolatilitySurfaceCalibrator.hpp>
 #include <iostream>
-#include <types.hpp>
 
-int main() {
 
-    double spot = 100.0;
-    double strike = 100.0;
-    double maturity = 1.0;
-    double free_risk_interest_rate = 0.03;
-    double dividend = 0.0;
-    double kappa = 2.5;
-    double theta = 0.05;
-    double vol_vol = 0.4;
-    double rho = -0.4;
-    double v0 = 0.04;
-    double implied_vol = std::sqrt(v0);
+class Buffer{
+    
+    private: 
+    int size; 
+    double * data; 
 
-    Option base_opt = {spot, strike, maturity, free_risk_interest_rate, dividend, OptionType::Call};
-    HestonParams true_params = {kappa, theta, vol_vol, rho, v0};
-    Heston heston_base(base_opt, true_params);
-    BS black(base_opt, implied_vol);
+    public : 
 
-    std::cout << "le prix de l'option selon Heston est : " << heston_base.price() << std::endl;
-    std::cout << "le prix de l'option selon black est : " << black.price() << std::endl;
-
-    // Generate synthetic market data (grid of strikes and maturities)
-    std::vector<MarketOptionData> market_quotes;
-    std::vector<double> strikes = {80, 90, 100, 110, 120};
-    std::vector<double> maturities = {0.25, 0.5, 1.0, 2.0};
-
-    for (double T : maturities) {
-        for (double K : strikes) {
-            Option o = {spot, K, T, free_risk_interest_rate, dividend, OptionType::Call};
-            Heston h(o, true_params);
-            double model_price = h.price();
-            // small deterministic perturbation to mimic market noise
-            double noisy_price = model_price * (1.0 + 0.002 * ((K - spot) / spot));
-            MarketOptionData q = {
-                spot, K, T, noisy_price, free_risk_interest_rate, dividend, OptionType::Call};
-            market_quotes.push_back(q);
-        }
+    Buffer(int size_): size(size_){
+        data = new double[size];
     }
 
-    // Run Heston calibration on synthetic data
-    HestonCalibrator hcal(market_quotes);
-    hcal.fit();
-    HestonParams calib = hcal.GetParams();
+    // Constructeur de copie pour copier les données d'un autre Buffer
+    Buffer(const Buffer& other): size(other.size){
+        data = new double[size];
+        for(int i = 0; i < size; ++i){
+            data[i] = other.data[i];
+        }
+    }
+    // Constructeur de déplacement pour transférer la propriété des données d'un autre Buffer
+    Buffer(Buffer&& other) noexcept : size(other.size), data(other.data) {
+        other.data = nullptr; // Éviter la double libération de mémoire
+    }
+    // c'est un operateur de mouvement pour transférer la propriété des données d'un autre Buffer
+    Buffer operator=(Buffer&& other) noexcept {
+        if (this !=& other){
+            delete[] data; // Libérer la mémoire existante
+            size = other.size;
+            data = other.data;
+            other.data = nullptr; // Éviter la double libération de mémoire
+        }
+        return *this;
+    }
+    // Destructeur pour libérer la mémoire allouée
+    ~Buffer(){
+        delete[] data;
+    }
 
-    std::cout << "True params: kappa=" << kappa << " theta=" << theta << " vol_vol=" << vol_vol
-              << " rho=" << rho << " v0=" << v0 << std::endl;
-    std::cout << "Calibrated params: kappa=" << calib.kappa << " theta=" << calib.theta
-              << " vol_vol=" << calib.vol_vol << " rho=" << calib.rho << " v0=" << calib.v0
-              << std::endl;
+    double & operator[](int index){
+        return data[index];
+    }
+};
 
+template <typename F, typename arg>
+auto make_call(F&& f, arg&& a) {
+    return std::forward<F>(f)(std::forward<arg>(a));
+}
+/*
+&& le forward est utilisé pour transmettre les arguments à la fonction f de manière efficace, en préservant leur type et leur valeur (lvalue ou rvalue). 
+Cela permet d'éviter des copies inutiles et d'optimiser les performances, surtout lorsque les arguments sont des objets volumineux ou complexes.
+
+*/
+
+
+int main() {
+    auto f = [](int x) { return x * x; };
+    int value = 5;
+    int result = make_call(f, value);
+    std::cout << "Result: " << result << std::endl; // Affiche "Result: 25"
     return 0;
 }

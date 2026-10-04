@@ -4,7 +4,8 @@
 #include <types.hpp>
 #include <stdexcept>
 
-template <typename Derived> class IPricer {
+template <typename Derived> 
+class IPricer {
 protected:
     Option option;
 public:

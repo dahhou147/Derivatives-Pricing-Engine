@@ -1,6 +1,12 @@
 #include <BlackScholesGreeks.hpp>
 #include <math.hpp>
 
+/*
+
+*l'implémentation
+
+*/
+
 BS BSGreeks::get_pricer() const {
     return pricer;
 }
