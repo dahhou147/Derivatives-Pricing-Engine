@@ -1,223 +1,242 @@
-#include <vector>
+#include <iostream>
+#include <concepts>
+#include <memory>
 #include <cmath>
+#include <optional>
+#include <concepts>
+#include <vector>
+
+class Buffer{
+    
+    private: 
+    int size; 
+    double * data; 
+
+    public : 
+
+    Buffer(int size_): size(size_){
+        data = new double[size];
+    }
+
+    // Constructeur de copie pour copier les données d'un autre Buffer
+    Buffer(const Buffer& other): size(other.size){
+        data = new double[size];
+        for(int i = 0; i < size; ++i){
+            data[i] = other.data[i];
+        }
+    }
+    // Constructeur de déplacement pour transférer la propriété des données d'un autre Buffer
+    Buffer(Buffer&& other) noexcept : size(other.size), data(other.data) {
+        other.data = nullptr; // Éviter la double libération de mémoire
+    }
+    // c'est un operateur de mouvement pour transférer la propriété des données d'un autre Buffer
+    Buffer operator=(Buffer&& other) noexcept {
+        if (this !=& other){
+            delete[] data; // Libérer la mémoire existante
+            size = other.size;
+            data = other.data;
+            other.data = nullptr; // Éviter la double libération de mémoire
+        }
+        return *this;
+    }
+    // Destructeur pour libérer la mémoire allouée
+    ~Buffer(){
+        delete[] data;
+    }
+
+    double & operator[](int index){
+        return data[index];
+    }
+    void print() const {
+        for(int i = 0; i < size; ++i){
+            std::cout << data[i] << " ";
+        }
+        std::cout << std::endl;
+    }
+};
+
+template <typename F, typename arg>
+auto make_call(F&& f, arg&& a) {
+    return std::forward<F>(f)(std::forward<arg>(a));
+}
+/*
+&& le forward est utilisé pour transmettre les arguments à la fonction f de manière efficace, en préservant leur type et leur valeur (lvalue ou rvalue). 
+Cela permet d'éviter des copies inutiles et d'optimiser les performances, surtout lorsque les arguments sont des objets volumineux ou complexes.
+
+*/
+
+
+class Model {
+    private:
+    std::string name ;
+
+    public : 
+
+    Model(std::string name_): name(name_){}
+
+    void display_name() const {
+        std::cout << "Model name: " << name << std::endl;
+    }
+};
+
+void call_model(Model* model) {
+    model->display_name();
+}
+
+std::optional<double> safe_divide(double numerator, double denominator) {
+    if (denominator == 0.0) {
+        return std::nullopt; // Retourne un std::optional vide si le dénominateur est zéro
+    }
+    return numerator / denominator; // Retourne le résultat de la division encapsulé dans un std::optional
+}
+template< typename T> concept defferentiable = requires(T a, T b) {
+    { a + b } -> std::same_as<T>;
+    { a * b } -> std::same_as<T>;
+    { std::sin(a) } -> std::same_as<T>;
+};
+
+template<defferentiable T>
+T compute_expression(const T& x, const T& y) {
+    return std::sin(x) + x * y;
+}
+
+template <typename T>
+void f(T && buf) {
+    std::cout << "Function f called" << std::endl;
+}
+// la fonction f accepte les rvlue et les lvalue cela ce qu'on appelle le forwarding reference, 
+//mais dans le bloc buf devient une lvalue, pour conserver le type d'origine de buf, on utilise std::forward<T>(buf) pour le transmettre à la fonction f.
+
+template <typename F, typename... args>
+/*
+definir les templates comme ça permet de créer des fonction generique et de meme creer des decorateurs.
+*/
+void g(F&& f, args&&... arguments) {
+    (std::forward<F>(f)(std::forward<args>(arguments)), ...);
+}
+
+std::vector<int> add(const std::vector<int>& a , const std::vector<int>& b){
+    std::size_t size = a.size();
+    std::vector<int> result(size);
+    const int* pa = a.data();
+    const int* pb = b.data();
+    int * res = result.data();
+
+    for(std::size_t i =0; i< size; i++){
+           res[i] = pa[i]+pb[i]; 
+    }
+    return result;
+}
+void axpy(std::size_t n, double a ,  double * __restrict_arr x,  double* __restrict_arr y ){
+    for(std::size_t i = 0; i<n; i++){
+        y[i] = a*x[i]+y[i]; 
+    }
+}
+
+class payoff {
+    public : 
+    virtual  double operator()() const = 0;
+};
+class Put : public payoff{
+    private :
+    double strike;
+    double spot ;
+    public :
+    Put(double spot, double strike): spot(spot), strike(strike){};
+    double operator()()const override{
+        return std::max(strike-spot, 0.0);
+    }
+};
+
+class Call: public payoff{
+    private:
+    double strike;
+    double spot;
+    public: 
+    Call(double spot, double strike) : spot(spot), strike(strike){};
+
+    double operator()() const override{
+        return std::max(spot-strike, 0.0);
+    }
+};
+
+// crtp 
+enum class Type {Call, Put};
+
+template<class derived>
+class Payoff_instrument {
+    protected:  
+    Type type;
+    Payoff_instrument(Type type): type(type){};
+    public :
+    double price() const {
+        return static_cast<const derived*>(this)-> payoff();
+    }
+
+};
+
+class Call_CRTP : public Payoff_instrument<Call_CRTP>{
+    private : 
+    double spot;
+    double strike;
+    public :
+    Call_CRTP(double spot, double strike): spot(spot), strike(strike), Payoff_instrument<Call_CRTP>(Type::Call){};
+
+    double payoff() const {
+        return std::max(spot-strike, 0.0);
+    }
+};
 #include <iostream>
 #include <memory>
-#include <random>
-#include <functional>
 
-struct Fwd {
-    double val;
-    std::vector<double> grad;   // taille d
+struct Widget {
+    int id;
+    Widget(int i) : id(i) { std::cout << "  [Widget " << id << " créé]\n"; }
+    ~Widget() { std::cout << "  [Widget " << id << " détruit]\n"; }
 };
 
-Fwd operator+(const Fwd& a, const Fwd& b) {
-    Fwd r{a.val + b.val, std::vector<double>(a.grad.size())};
-    for (size_t i = 0; i < a.grad.size(); ++i)
-        r.grad[i] = a.grad[i] + b.grad[i];
-    return r;
+// ❌ PLUS COÛTEUX : Passage par valeur
+// Copier le shared_ptr incrémente/décrémente le compteur de manière atomique.
+void configurationLourde(std::shared_ptr<Widget> w) {
+    std::cout << "  Dans configurationLourde, compteur = " << w.use_count() << "\n";
 }
 
-Fwd operator*(const Fwd& a, const Fwd& b) {
-    Fwd r{a.val * b.val, std::vector<double>(a.grad.size())};
-    for (size_t i = 0; i < a.grad.size(); ++i)
-        r.grad[i] = b.val * a.grad[i] + a.val * b.grad[i];
-    return r;
+//  MIEUX/OPTIMISÉ : Passage par référence constante
+// Pas de copie, pas d'incrémentation atomique. Le coût est identique à un pointeur brut.
+void configurationLegere(const std::shared_ptr<Widget>& w) {
+    std::cout << "  Dans configurationLegere, compteur = " << w.use_count() << "\n";
 }
-
-Fwd sin(const Fwd& a) {
-    Fwd r{std::sin(a.val), std::vector<double>(a.grad.size())};
-    for (size_t i = 0; i < a.grad.size(); ++i)
-        r.grad[i] = std::cos(a.val) * a.grad[i];
-    return r;
-}
-
-struct Node;
-
-struct Edge {
-    Node* parent;
-    double derivative;
-};
-
-struct Node {
-    double val = 0.0;
-    double adjoint = 0.0;
-    std::vector<Edge> parents;
-};
-
-struct Tape {
-    std::vector<std::unique_ptr<Node>> nodes;
-
-    Node* create_node(double val) {
-        auto node = std::make_unique<Node>();
-        node->val = val;
-        Node* ptr = node.get();
-        nodes.push_back(std::move(node));
-        return ptr;
-    }
-
-    // --- Opérations arithmétiques ---
-    size_t mark() const {
-        return nodes.size();
-    }
-    Node* add(Node* a, Node* b) {
-        Node* r = create_node(a->val + b->val);
-        r->parents.push_back({a, 1.0});
-        r->parents.push_back({b, 1.0});
-        return r;
-    }
-
-    Node* sub(Node* a, Node* b) {
-        Node* r = create_node(a->val - b->val);
-        r->parents.push_back({a, 1.0});
-        r->parents.push_back({b, -1.0});
-        return r;
-    }
-
-    Node* mul(Node* a, Node* b) {
-        Node* r = create_node(a->val * b->val);
-        r->parents.push_back({a, b->val});
-        r->parents.push_back({b, a->val});
-        return r;
-    }
-
-    Node* div(Node* a, Node* b) {
-        Node* r = create_node(a->val / b->val);
-        r->parents.push_back({a, 1.0 / b->val});
-        r->parents.push_back({b, -a->val / (b->val * b->val)});
-        return r;
-    }
-
-    Node* sin(Node* a) {
-        Node* r = create_node(std::sin(a->val));
-        r->parents.push_back({a, std::cos(a->val)});
-        return r;
-    }
-
-    Node* cos(Node* a) {
-        Node* r = create_node(std::cos(a->val));
-        r->parents.push_back({a, -std::sin(a->val)});
-        return r;
-    }
-
-    Node* exp(Node* a) {
-        double e = std::exp(a->val);
-        Node* r = create_node(e);
-        r->parents.push_back({a, e});
-        return r;
-    }
-
-    Node* log(Node* a) {
-        Node* r = create_node(std::log(a->val));
-        r->parents.push_back({a, 1.0 / a->val});
-        return r;
-    }
-    Node * max(Node * a, Node * b) {
-        Node * r = create_node(std::max(a->val, b->val));
-        if (a->val > b->val) {
-            r->parents.push_back({a, 1.0});
-            r->parents.push_back({b, 0.0});
-        } else {
-            r->parents.push_back({a, 0.0});
-            r->parents.push_back({b, 1.0});
-        }
-        return r;
-    }
-
-    // --- Reverse ---
-
-    void backward(Node* output) {
-        output->adjoint = 1.0;
-        for (auto it = nodes.rbegin(); it != nodes.rend(); ++it) {
-            Node* n = it->get();
-            for (auto& e : n->parents) {
-                e.parent->adjoint += n->adjoint * e.derivative;
-            }
-        }
-    }
-
-    void backward_from(Node* output, size_t mark) {
-        output->adjoint = 1.0;
-        for (size_t i = nodes.size() - 1; i >= mark; --i) {
-            Node* n = nodes[i].get();
-            for (auto& e : n->parents) {
-                e.parent->adjoint += n->adjoint * e.derivative;
-            }
-        }
-    }
-    void backward_prefix(size_t mark) {
-        for (size_t i =mark; i-- > 0; ) {
-            Node* n = nodes[i].get();
-            for (auto& e : n->parents) {
-                e.parent->adjoint += n->adjoint * e.derivative;
-            }
-        }
-    }
-
-    void rewind(size_t mark) {
-        nodes.erase(nodes.begin() + mark, nodes.end());
-    }
-
-    Node * multi_mc(Node * a, double b) {
-        Node * r = create_node(a->val * b);
-        r->parents.push_back({a, b});
-        return r;
-    }
-    Node * square(Node * a) {
-        Node * r = create_node(a->val * a->val);
-        r->parents.push_back({a, 2.0 * a->val});
-        return r;
-    }
-    Node * sqrt(Node * a) {
-        Node * r = create_node(std::sqrt(a->val));
-        r->parents.push_back({a, 0.5 / std::sqrt(a->val)});
-        return r;
-    }
-
-    void reset() {
-        for (auto& n : nodes) n->adjoint = 0.0;
-    }
-
-    void clear() {
-        nodes.clear();
-    }
-};
 
 int main() {
-    // on va calculer les derivées de par simulation de Monte Carlo d'une option européenne
-    Tape tape;
-    Node * spot_0 = tape.create_node(100.0);  // prix du sous-jacent
-    Node * strike = tape.create_node(100.0); // prix d'exercice
-    Node * maturity = tape.create_node(1.0); // maturité en années
-    Node * rate = tape.create_node(0.05);     // taux d'intérêt sans risque
-    Node * sigma = tape.create_node(0.2); // volatilité
-    int nums_steps = 1000;
-    int nums_paths = 10000;
-    Node* sigma_sq = tape.square(sigma);
-    Node * dt = tape.multi_mc(maturity, 1.0 / nums_steps);
-    Node *  drift= tape.sub(rate, tape.multi_mc(sigma_sq, 0.5));
-    Node * drift_dt = tape.mul(drift, dt);
-    Node * sigma_sqrt_dt = tape.mul(sigma, tape.sqrt(dt));
-    std::mt19937 gen(12345);  // seed fixe pour la reproducibilité
-    std::normal_distribution<double> normal(0.0, 1.0);
+    std::cout << "=== 1. Démonstration des coûts de copie ===\n";
+    // Allocation unique et optimisée grâce à std::make_shared
+    auto ptrPartage = std::make_shared<Widget>(42); 
+    std::cout << "Compteur initial = " << ptrPartage.use_count() << "\n";
 
-    size_t mark = tape.mark();
-    for (int i = 0; i<nums_paths; ++i) {
-        Node * spot = spot_0;
-        for (int j = 0; j < nums_steps; ++j) {
-            double z = normal(gen);
-            Node * diffusion = tape.multi_mc(sigma_sqrt_dt, z);
-            Node * increment = tape.add(drift_dt, diffusion);
-            spot = tape.mul(spot, tape.exp(increment));
-        }
-        Node * discount_factor = tape.exp(tape.mul(rate, tape.multi_mc(maturity, -1.0)));
-        Node * payoff = tape.max(tape.sub(spot, strike), tape.create_node(0.0));
-        Node * discounted_payoff = tape.mul(discount_factor, payoff);
-        tape.backward_from(discounted_payoff, mark);
-        tape.rewind(mark);
+    std::cout << "\nAppel par valeur (coûteux) :\n";
+    configurationLourde(ptrPartage); // Provoque des opérations atomiques cachées
+
+    std::cout << "\nAppel par référence (gratuit) :\n";
+    configurationLegere(ptrPartage); // Aucune opération atomique
+
+    std::cout << "\n=== 2. Le piège de la mémoire avec std::make_shared ===\n";
+    std::weak_ptr<Widget> ptrFaible;
+
+    {
+        // Un deuxième shared_ptr créé dans un bloc isolé
+        auto ptrTemporaire = std::make_shared<Widget>(99);
+        ptrFaible = ptrTemporaire; // Le weak_ptr observe l'objet
+        
+        std::cout << "Destruction imminente de ptrTemporaire...\n";
+    } // ptrTemporaire sort du champ et est détruit
+
+    std::cout << "\nStatut après le bloc :\n";
+    if (ptrFaible.expired()) {
+        std::cout << "-> L'objet Widget(99) est bien DÉTRUIT.\n";
+        std::cout << "-> ATTENTION : À cause de std::make_shared, les octets occupés par\n";
+        std::cout << "   le Widget ne sont pas encore rendus au système, car le bloc mémoire\n";
+        std::cout << "   héberge aussi le compteur du ptrFaible encore vivant !\n";
     }
-    tape.backward_prefix(mark);
-    std::cout << "Delta: " << spot_0->adjoint/nums_paths << std::endl;
-    std::cout << "Vega: " << sigma->adjoint/nums_paths << std::endl;
-    std::cout << "Rho: " << rate->adjoint/nums_paths << std::endl;
-    std::cout << "Theta: " << maturity->adjoint/nums_paths << std::endl;
+
+    return 0;
 }

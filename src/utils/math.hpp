@@ -75,7 +75,8 @@ inline double gauss_legendre(F&& f, double a, double b) {
 
 
 /*
-c'est l'algo de brent qui combine besect et
+* c'est l'algo de brent qui combine besect et newton cote on commece par evaluer la fonction dans les bornes de l'intervalle
+
 
 
 */

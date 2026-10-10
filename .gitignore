@@ -14,13 +14,13 @@ cmake-build-*/
 *.swo
 *~
 .DS_Store
-
+brouillon.cpp
 # CMake
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
-
+main.cpp
 # Binaries
 bin/
 lib/
